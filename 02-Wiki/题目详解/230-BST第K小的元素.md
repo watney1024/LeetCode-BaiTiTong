@@ -77,6 +77,38 @@ def kthSmallest(root, k):
     return result
 ```
 
+```cpp
+// 思路一：中序遍历 + 计数器（C++）
+struct TreeNode {
+    int val;
+    TreeNode *left;
+    TreeNode *right;
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+};
+
+class Solution {
+public:
+    int kthSmallest(TreeNode* root, int k) {
+        int count = 0;
+        int result = 0;
+        inorder(root, k, count, result);
+        return result;
+    }
+
+private:
+    void inorder(TreeNode* node, int k, int& count, int& result) {
+        if (!node) return;
+        inorder(node->left, k, count, result);   // 左：更小的元素
+        count++;                                  // 根：访问当前节点，计数器 +1
+        if (count == k) {
+            result = node->val;
+            return;
+        }
+        inorder(node->right, k, count, result);  // 右
+    }
+};
+```
+
 ### 思路二：中序遍历迭代法（提前终止）
 
 用栈模拟中序遍历，可以随时暂停和继续。找到第 k 个元素后立即停止，不需要继续遍历剩余节点。
@@ -100,6 +132,35 @@ def kthSmallest(root, k):
             return cur.val  # 找到第 k 小的元素
 
         cur = cur.right
+```
+
+```cpp
+// 思路二：中序遍历迭代法（C++）
+struct TreeNode {
+    int val;
+    TreeNode *left;
+    TreeNode *right;
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+};
+
+class Solution {
+public:
+    int kthSmallest(TreeNode* root, int k) {
+        stack<TreeNode*> st;
+        TreeNode* cur = root;
+        while (cur || !st.empty()) {
+            while (cur) {           // 一路向左
+                st.push(cur);
+                cur = cur->left;
+            }
+            cur = st.top(); st.pop();
+            k--;
+            if (k == 0) return cur->val;  // 找到第 k 小的元素
+            cur = cur->right;
+        }
+        return -1;
+    }
+};
 ```
 
 ### 思路三：记录左子树大小（进阶解法）
@@ -131,6 +192,36 @@ def kthSmallest(root, k):
             k -= cur.left_size + 1
             cur = cur.right
     return -1
+```
+
+```cpp
+// 思路三：记录左子树大小（进阶解法，C++）
+struct TreeNode {
+    int val;
+    TreeNode *left;
+    TreeNode *right;
+    int left_size;  // 左子树节点数
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr), left_size(0) {}
+};
+
+class Solution {
+public:
+    int kthSmallest(TreeNode* root, int k) {
+        // 假设树节点已经维护了 left_size 属性
+        TreeNode* cur = root;
+        while (cur) {
+            if (k <= cur->left_size) {
+                cur = cur->left;
+            } else if (k == cur->left_size + 1) {
+                return cur->val;
+            } else {
+                k -= cur->left_size + 1;
+                cur = cur->right;
+            }
+        }
+        return -1;
+    }
+};
 ```
 
 ---
@@ -168,6 +259,38 @@ def kthElement(root, k):
     return result
 ```
 
+```cpp
+// 中序遍历 + 计数器模板（C++ 版）
+struct TreeNode {
+    int val;
+    TreeNode *left;
+    TreeNode *right;
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+};
+
+class Solution {
+public:
+    int kthElement(TreeNode* root, int k) {
+        int count = 0;
+        int result = -1;
+        inorder(root, k, count, result);
+        return result;
+    }
+
+private:
+    void inorder(TreeNode* node, int k, int& count, int& result) {
+        if (!node || result != -1) return;
+        inorder(node->left, k, count, result);
+        count++;
+        if (count == k) {
+            result = node->val;
+            return;
+        }
+        inorder(node->right, k, count, result);
+    }
+};
+```
+
 **BST 中提前终止的迭代模板：**
 
 ```python
@@ -182,6 +305,37 @@ def inorder_iterative(root, k):
         if some_condition(cur):
             return cur.val
         cur = cur.right
+```
+
+```cpp
+// BST 中提前终止的迭代模板（C++ 版）
+struct TreeNode {
+    int val;
+    TreeNode *left;
+    TreeNode *right;
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+};
+
+class Solution {
+public:
+    int inorderIterative(TreeNode* root, int k) {
+        stack<TreeNode*> stack;
+        TreeNode* cur = root;
+        while (cur || !stack.empty()) {
+            while (cur) {
+                stack.push(cur);
+                cur = cur->left;
+            }
+            cur = stack.top(); stack.pop();
+            // 处理当前节点
+            if (some_condition(cur)) {
+                return cur->val;
+            }
+            cur = cur->right;
+        }
+        return -1;
+    }
+};
 ```
 
 ---
