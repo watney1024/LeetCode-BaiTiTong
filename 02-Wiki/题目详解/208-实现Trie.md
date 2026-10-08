@@ -99,6 +99,49 @@ class Trie:
         return node
 ```
 
+```cpp
+// 思路一：字典实现（适合字符集较大/灵活场景）（推荐，C++）
+class Trie {
+public:
+    unordered_map<char, Trie*> children;   // 字符 → Trie节点
+    bool isEnd;                            // 是否为完整单词的结尾
+
+    Trie() : isEnd(false) {}
+
+    void insert(string word) {
+        Trie* node = this;
+        for (char ch : word) {
+            if (node->children.count(ch) == 0) {
+                node->children[ch] = new Trie();
+            }
+            node = node->children[ch];
+        }
+        node->isEnd = true;   // 标记结尾
+    }
+
+    bool search(string word) {
+        Trie* node = _find(word);
+        return node != nullptr && node->isEnd;
+    }
+
+    bool startsWith(string prefix) {
+        return _find(prefix) != nullptr;
+    }
+
+    // 返回前缀路径的最后一个节点，若不存在返回 nullptr
+    Trie* _find(const string& prefix) {
+        Trie* node = this;
+        for (char ch : prefix) {
+            if (node->children.count(ch) == 0) {
+                return nullptr;
+            }
+            node = node->children[ch];
+        }
+        return node;
+    }
+};
+```
+
 ### 思路二：数组实现（适合固定小字符集，性能更高）
 
 用长度为 26 的数组替代字典，访问更快（数组索引 O(1) vs 字典哈希 O(1) 但常数略大）。
@@ -135,6 +178,52 @@ class Trie:
         return node
 ```
 
+```cpp
+// 思路二：数组实现（适合固定小字符集，性能更高，C++）
+class Trie {
+public:
+    Trie* children[26];   // 固定 26 个小写字母
+    bool isEnd;
+
+    Trie() : isEnd(false) {
+        for (int i = 0; i < 26; ++i) children[i] = nullptr;
+    }
+
+    void insert(string word) {
+        Trie* node = this;
+        for (char ch : word) {
+            int idx = ch - 'a';
+            if (node->children[idx] == nullptr) {
+                node->children[idx] = new Trie();
+            }
+            node = node->children[idx];
+        }
+        node->isEnd = true;
+    }
+
+    bool search(string word) {
+        Trie* node = _find(word);
+        return node != nullptr && node->isEnd;
+    }
+
+    bool startsWith(string prefix) {
+        return _find(prefix) != nullptr;
+    }
+
+    Trie* _find(const string& prefix) {
+        Trie* node = this;
+        for (char ch : prefix) {
+            int idx = ch - 'a';
+            if (node->children[idx] == nullptr) {
+                return nullptr;
+            }
+            node = node->children[idx];
+        }
+        return node;
+    }
+};
+```
+
 **性能对比：** 数组版更快（内存连续，无哈希冲突），字典版更灵活（支持 Unicode、数字等所有字符）。
 
 ### 思路三：递归插入 + 删除操作扩展
@@ -159,6 +248,33 @@ def delete(root, word, depth=0):
     if not root.is_end and all(child is None for child in root.children):
         return None
     return root
+```
+
+```cpp
+// 思路三：递归插入 + 删除操作扩展（C++）
+// 假设节点结构同思路二（children 为长度 26 的数组，isEnd 标记结尾）
+// 注意：delete 是 C++ 关键字，故函数命名为 deleteWord
+Trie* deleteWord(Trie* root, const string& word, int depth = 0) {
+    if (!root) return nullptr;
+    if (depth == (int)word.size()) {
+        root->isEnd = false;   // 取消结尾标记
+        // 如果没有子节点，可以删掉当前节点
+        bool hasChild = false;
+        for (int i = 0; i < 26; ++i)
+            if (root->children[i]) { hasChild = true; break; }
+        if (!hasChild) return nullptr;
+        return root;
+    }
+    int idx = word[depth] - 'a';
+    root->children[idx] = deleteWord(root->children[idx], word, depth + 1);
+
+    // 如果当前节点没有子节点且不是单词结尾，可以删除
+    bool anyChild = false;
+    for (int i = 0; i < 26; ++i)
+        if (root->children[i]) { anyChild = true; break; }
+    if (!root->isEnd && !anyChild) return nullptr;
+    return root;
+}
 ```
 
 ---
@@ -209,6 +325,53 @@ class Trie:
 
     def startsWith(self, prefix):
         return self.search_prefix_node(prefix) is not None
+```
+
+```cpp
+// Trie 标准模板（字典版，最通用）（C++ 版）
+class TrieNode {
+public:
+    unordered_map<char, TrieNode*> children;
+    bool isEnd;
+    TrieNode() : isEnd(false) {}
+};
+
+class Trie {
+public:
+    TrieNode* root;
+    Trie() { root = new TrieNode(); }
+
+    void insert(string word) {
+        TrieNode* node = root;
+        for (char ch : word) {
+            if (node->children.count(ch) == 0) {
+                node->children[ch] = new TrieNode();
+            }
+            node = node->children[ch];
+        }
+        node->isEnd = true;
+    }
+
+    TrieNode* search_prefix_node(const string& prefix) {
+        TrieNode* node = root;
+        for (char ch : prefix) {
+            if (node->children.count(ch) == 0) {
+                return nullptr;
+            }
+            node = node->children[ch];
+        }
+        return node;
+    }
+
+    bool search(string word) {
+        TrieNode* node = search_prefix_node(word);
+        return node != nullptr && node->isEnd;
+    }
+
+    bool startsWith(string prefix) {
+        return search_prefix_node(prefix) != nullptr;
+    }
+};
 ```
 
 **适用场景：** 前缀匹配、自动补全、拼写检查、词频统计、IP 路由前缀匹配。

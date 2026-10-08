@@ -20,3 +20,10 @@ desktop.ini
 
 # Qoder 本地权限设置
 .qoder/
+
+# VS Code 个人配色（Peacock）
+.vscode/
+
+# tools/pdf 生成的导出产物（约 29MB 二进制，入库后难以真正移除，需要时本地重新导出）
+04-Outputs/*.pdf
+04-Outputs/*.html
