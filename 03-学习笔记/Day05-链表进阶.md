@@ -46,6 +46,7 @@ pre = group_head
 + 1015: 难点在于怎么把头接起来
 + 1015: 递归版已完成。关键：reverse(a, b) 后原头节点 a 变成第一组的尾节点，必须接递归处理剩余部分的**返回值**（a->next = reverseKGroup(b, k)），不能直接指向 b，也不能丢弃返回值
 + 1015: 易错——reverse() 中 prev 要初始化为 nullptr
++ 1025: ✅ 一遍过（9'49），但自述「还是有点晕」→ 待对照标答；候补收口（10-14/10-15 两触未过 → 今日首过）
 
 
 ### 138. 随机链表的复制（Medium）
@@ -77,6 +78,7 @@ pre = group_head
 - **感悟/易错点：**
 + 1014: 太复杂了, 需要再消化一下
 + 1015: 有点懂了
++ 1025: ❌ 还是没写出来 → 安排二刷。坑点：① DoubleList 声明 `DoubleList cache();` ② Node 构造顺序写反 ③ 返回值应是链表且缺空表保护 ④ put 里要记得调 deleteKey ⑤ removeLastRecently() ⑥ removeFirst 要复用 remove()
 ---
 
 ## 三、今日总结
